@@ -96,38 +96,48 @@ class TestMerge2Dicts:
         self, three_sample_rna_dict, three_sample_mirna_dict, alignment_df_2
     ):
         result = merge_2dicts(
-            three_sample_rna_dict, three_sample_mirna_dict, 'mirna',
+            three_sample_rna_dict, three_sample_mirna_dict, 'rna', 'mirna',
             alignment_df_2, 'Tw'
         )
         assert len(result) == 3
         assert set(result.keys()) == {'Tw1', 'Tw2', 'Tw3'}
 
-    def test_omic2_cat_key_name_is_preserved(
+    def test_both_omic_cat_keys_present(
         self, three_sample_rna_dict, three_sample_mirna_dict, alignment_df_2
     ):
         result = merge_2dicts(
-            three_sample_rna_dict, three_sample_mirna_dict, 'mirna',
+            three_sample_rna_dict, three_sample_mirna_dict, 'rna', 'mirna',
             alignment_df_2, 'Tw'
         )
         for entry in result.values():
-            assert 'mirna' in entry
             assert 'rna' in entry
+            assert 'mirna' in entry
             assert 'cd' in entry
 
-    def test_custom_omic2_cat_name(
+    def test_custom_omic_cat_names(
         self, three_sample_rna_dict, three_sample_mirna_dict, alignment_df_2
     ):
-        # Use a non-standard omic2_cat name
-        mirna_dict_renamed = {
-            k: {**{ik: iv for ik, iv in v.items() if ik != 'mirna'}, 'custom_omic': v['mirna']}
-            for k, v in three_sample_mirna_dict.items()
-        }
-        result = merge_2dicts(
-            three_sample_rna_dict, mirna_dict_renamed, 'custom_omic',
-            alignment_df_2, 'Tw'
-        )
+        # Build dicts whose inner omic key matches the custom names we will pass
+        d1 = {k: {'cd': v['cd'], 'omic_a': v['rna']} for k, v in three_sample_rna_dict.items()}
+        d2 = {k: {'cd': v['cd'], 'omic_b': v['mirna']} for k, v in three_sample_mirna_dict.items()}
+        result = merge_2dicts(d1, d2, 'omic_a', 'omic_b', alignment_df_2, 'Tw')
         for entry in result.values():
-            assert 'custom_omic' in entry
+            assert 'omic_a' in entry
+            assert 'omic_b' in entry
+
+    def test_non_rna_first_omic(
+        self, three_sample_cnv_dict, three_sample_meth_dict, alignment_df_3
+    ):
+        # Merge CNV + methylation (no RNA involved)
+        alignment_2 = alignment_df_3[['Case ID', 'GFile ID', 'MFile ID']].copy()
+        result = merge_2dicts(
+            three_sample_cnv_dict, three_sample_meth_dict, 'gene', 'meth',
+            alignment_2, 'Tw'
+        )
+        assert len(result) == 3
+        for entry in result.values():
+            assert 'gene' in entry
+            assert 'meth' in entry
 
     def test_missing_case_skipped(
         self, three_sample_rna_dict, three_sample_mirna_dict, alignment_df_2,
@@ -138,7 +148,7 @@ class TestMerge2Dicts:
             'MiR2': three_sample_mirna_dict['MiR2'],
         }
         result = merge_2dicts(
-            three_sample_rna_dict, partial_mirna, 'mirna',
+            three_sample_rna_dict, partial_mirna, 'rna', 'mirna',
             alignment_df_2, 'Tw'
         )
         assert len(result) == 2
@@ -146,7 +156,6 @@ class TestMerge2Dicts:
     def test_join_key_sample_id(
         self, make_clinical, make_rna_df, make_mirna_df
     ):
-        # Verify join_key='Sample ID' works correctly
         rna = {
             'T1': {'cd': make_clinical('C1', 'F1', sample_id='S1'), 'rna': make_rna_df(0)},
         }
@@ -154,7 +163,7 @@ class TestMerge2Dicts:
             'M1': {'cd': make_clinical('C1', 'MiRF1', sample_id='S1'), 'mirna': make_mirna_df(0)},
         }
         alignment = pd.DataFrame({'Sample ID': ['S1'], 'File ID': ['F1'], 'MiRFile ID': ['MiRF1']})
-        result = merge_2dicts(rna, mirna, 'mirna', alignment, 'Tw', join_key='Sample ID')
+        result = merge_2dicts(rna, mirna, 'rna', 'mirna', alignment, 'Tw', join_key='Sample ID')
         assert len(result) == 1
         assert result['Tw1']['cd']['Sample ID'].iloc[0] == 'S1'
 

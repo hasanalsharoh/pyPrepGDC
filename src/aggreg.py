@@ -41,38 +41,39 @@ def merge_3dicts(rna_dict, cnv_dict, meth_dict, alignment_df, classific):
     return merged
 
 
-def merge_2dicts(rna_dict, omic2_dict, omic2_cat, alignment_df, classific, join_key='Case ID'):
+def merge_2dicts(dict1, dict2, omic1_cat, omic2_cat, alignment_df, classific, join_key='Case ID'):
     """
-    Merge two omics dicts (RNA + one secondary omic) using a pre-built alignment DataFrame.
+    Merge any two omics dicts using a pre-built alignment DataFrame.
 
-    O(1) lookup via reverse indices. Generic omic2_cat lets the caller name the second omic
-    key (e.g. 'mirna', 'gene', 'meth').
+    O(1) lookup via reverse indices. Both omic category names are caller-supplied so the
+    function is not tied to any specific omic type.
 
     Args:
-        rna_dict:     parsed RNA-seq dict from parse_gdc
-        omic2_dict:   parsed second-omic dict from parse_gdc
-        omic2_cat:    key name for the second omic in the output dict (e.g. 'mirna', 'gene')
+        dict1:        first parsed omic dict from parse_gdc
+        dict2:        second parsed omic dict from parse_gdc
+        omic1_cat:    key name for the first omic in the output dict (e.g. 'rna', 'gene')
+        omic2_cat:    key name for the second omic in the output dict (e.g. 'mirna', 'meth')
         alignment_df: DataFrame with at least a join_key column joining both omics
         classific:    string prefix for output keys (e.g. 'Tumor')
         join_key:     column to join on (default 'Case ID'; use 'Sample ID' to preserve
                       tumor/normal pairs within the same case)
 
     Returns:
-        dict keyed classific+i with 'cd', 'rna', and omic2_cat entries
+        dict keyed classific+i with 'cd', omic1_cat, and omic2_cat entries
     """
-    rna_idx   = {next(iter(v['cd'][join_key])): k for k, v in rna_dict.items()}
-    omic2_idx = {next(iter(v['cd'][join_key])): k for k, v in omic2_dict.items()}
+    idx1 = {next(iter(v['cd'][join_key])): k for k, v in dict1.items()}
+    idx2 = {next(iter(v['cd'][join_key])): k for k, v in dict2.items()}
 
     merged = {}
     for i, (_, row) in enumerate(alignment_df.iterrows(), 1):
-        key_val   = row[join_key]
-        rna_key   = rna_idx.get(key_val)
-        omic2_key = omic2_idx.get(key_val)
-        if rna_key and omic2_key:
+        key_val = row[join_key]
+        key1    = idx1.get(key_val)
+        key2    = idx2.get(key_val)
+        if key1 and key2:
             merged[f'{classific}{i}'] = {
                 'cd':      alignment_df[alignment_df[join_key] == key_val].reset_index(drop=True),
-                'rna':     rna_dict[rna_key]['rna'],
-                omic2_cat: omic2_dict[omic2_key][omic2_cat],
+                omic1_cat: dict1[key1][omic1_cat],
+                omic2_cat: dict2[key2][omic2_cat],
             }
     return merged
 
