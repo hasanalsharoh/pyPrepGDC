@@ -33,8 +33,11 @@ dependencies = [
 "Bug Tracker" = "https://github.com/hasanalsharoh/pyPrepGDC/issues"
 
 [tool.setuptools]
-packages = ["src"]
+packages = ["pyPrepGDC"]
 include-package-data = false
 
+[tool.setuptools.package-dir]
+pyPrepGDC = "src"
+
 [tool.setuptools.dynamic]
-version = {attr = "src.__version__"}
+version = {attr = "pyPrepGDC.__version__"}
