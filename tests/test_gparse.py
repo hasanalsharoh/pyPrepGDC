@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import pytest
+import src
 
 from src.gparse import _omic_generator, parse_gdc
 

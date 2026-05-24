@@ -18,7 +18,7 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Bio-Informatics"
 ]
-requires-python = ">=3.11.9"
+requires-python = ">=3.9"
 dependencies = [
     'pandas==2.3.3',
     'numpy==2.2.6',
@@ -29,12 +29,12 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/hasanalsharoh/PyPrepGDC"
-"Bug Tracker" = "https://github.com/hasanalsharoh/PyPrepGDC/issues"
+"Homepage" = "https://github.com/hasanalsharoh/pyPrepGDC"
+"Bug Tracker" = "https://github.com/hasanalsharoh/pyPrepGDC/issues"
 
 [tool.setuptools]
-packages = ["pyPrepGDC"]
+packages = ["src"]
 include-package-data = false
 
 [tool.setuptools.dynamic]
-version = {attr = "pyPrepGDC.__version__"}
+version = {attr = "src.__version__"}
