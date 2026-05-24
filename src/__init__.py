@@ -14,11 +14,21 @@ The main processing steps are:
 3) The data is then preprocessed using the pyPrepGDC package.
 """
 from .gparse import _omic_generator, parse_gdc
-from .aggreg import create_count_table
+from .aggreg import (
+    create_count_table,
+    merge_2dicts,
+    merge_3dicts,
+    build_clinical_df,
+    build_anndata,
+)
 
 
 __version__ = "0.0.1"
-__all__= [
+__all__ = [
     "parse_gdc",
-    "create_count_table"
+    "create_count_table",
+    "merge_2dicts",
+    "merge_3dicts",
+    "build_clinical_df",
+    "build_anndata",
 ]

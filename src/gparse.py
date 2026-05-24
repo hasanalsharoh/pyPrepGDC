@@ -2,7 +2,6 @@
 import os
 import pandas as pd
 import dask
-import pyarrow
 import dask.dataframe as dd
 import warnings
 
